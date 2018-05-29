@@ -50,9 +50,22 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>2.1.14</version>
+        </dependency>
+        <dependency>
             <groupId>org.omnifaces</groupId>
             <artifactId>omnifaces</artifactId>
             <version>2.4</version>
+        </dependency>
+
+        <!-- Payara specific dependencies -->
+
+        <dependency>
+            <groupId>fish.payara.api</groupId>
+            <artifactId>payara-api</artifactId>
+            <version>4.1.1.171.1</version>
         </dependency>
 
         <!-- GlassFish specific dependencies, could go away in Java EE 8 -->

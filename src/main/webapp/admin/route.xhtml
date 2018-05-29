@@ -81,7 +81,8 @@
                                 updateNotRouted();
                                 if (data == 'finished') {
                                     OmniFaces.Push.close(routeCandidates);
-                                } else {
+                                }
+                                if (data.startsWith('error:')) {
                                     alert(data);
                                 }
                             }

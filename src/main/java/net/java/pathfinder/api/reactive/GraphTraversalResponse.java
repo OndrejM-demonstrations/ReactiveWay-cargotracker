@@ -37,7 +37,7 @@ public class GraphTraversalResponse implements Serializable {
         return completed;
     }
 
-    public Object getId() {
+    public long getId() {
         return id;
     }
 

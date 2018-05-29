@@ -87,34 +87,25 @@ public class ItinerarySelection implements Serializable {
         cargo = bookingServiceFacade.loadCargoForRouting(trackingId);
         bookingServiceFacade
                 .requestPossibleRoutesForCargo(trackingId)
-                .acceptEach(stage -> {
-                    stage.thenAccept(routeCandidate -> {
-                        log.info(() -> "Accepted " + routeCandidate);
-                        routeCandidates.add(routeCandidate);
-                        websocketTriggered.thenRun(() -> {
-                            push.send("refresh");
-                        });
-                    }).exceptionally(e -> {
-                        log.log(Level.WARNING, e, () -> "Error: " + e.getMessage());
-                        websocketTriggered.thenRun(() -> {
-                            push.send("error: " + e.getMessage());
-                        });
-                        return null;
+                .doOnNext(routeCandidate -> {
+                    log.info(() -> "Accepted " + routeCandidate);
+                    routeCandidates.add(routeCandidate);
+                    websocketTriggered.thenRun(() -> {
+                        push.send("refresh");
+                    });
+                }).doOnError(e -> {
+                    log.log(Level.WARNING, e, () -> "Error: " + e.getMessage());
+                    websocketTriggered.thenRun(() -> {
+                        push.send("error: " + e.getMessage());
                     });
                 })
-                .whenFinished()
-                .whenComplete((v, e) -> {
+                .doOnComplete(() -> {
                     loadingFinished = true;
                     websocketTriggered.thenRun(() -> {
                         push.send("finished");
                     });
-                    if (e != null) {
-                        log.log(Level.WARNING, e, () -> "Error: " + e.getMessage());
-                        websocketTriggered.thenRun(() -> {
-                            push.send("error: " + e.getMessage());
-                        });
-                    }
-                });
+                })
+                .subscribe();
     }
 
     private boolean hasLoadingStarted() {

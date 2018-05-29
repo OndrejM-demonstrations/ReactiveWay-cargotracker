@@ -1,16 +1,12 @@
 package net.java.cargotracker.application.internal;
 
-import java.util.Collections;
+import io.reactivex.Flowable;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import net.java.cargotracker.application.BookingService;
-import net.java.cargotracker.application.util.reactive.CompletionStream;
-import net.java.cargotracker.application.util.reactive.DirectCompletionStream;
 import net.java.cargotracker.domain.model.cargo.Cargo;
 import net.java.cargotracker.domain.model.cargo.CargoRepository;
 import net.java.cargotracker.domain.model.cargo.Itinerary;
@@ -20,7 +16,6 @@ import net.java.cargotracker.domain.model.location.Location;
 import net.java.cargotracker.domain.model.location.LocationRepository;
 import net.java.cargotracker.domain.model.location.UnLocode;
 import net.java.cargotracker.domain.service.RoutingService;
-import net.java.cargotracker.interfaces.booking.facade.dto.RouteCandidate;
 
 @Stateless
 public class DefaultBookingService implements BookingService {
@@ -55,23 +50,14 @@ public class DefaultBookingService implements BookingService {
     }
 
     @Override
-    public CompletionStream<Itinerary> requestPossibleRoutesForCargo(TrackingId trackingId) {
+    public Flowable<Itinerary> requestPossibleRoutesForCargo(TrackingId trackingId) {
         Cargo cargo = cargoRepository.find(trackingId);
 
-        DirectCompletionStream<Itinerary> completion = new DirectCompletionStream<>();
-
         if (cargo == null) {
-            completion.processingFinished();
+            return Flowable.empty();
         } else {
-            routingService.fetchRoutesForSpecification(cargo.getRouteSpecification())
-                    .acceptEach(stage -> {
-                        stage.thenAccept(completion::itemProcessed);
-                    })
-                    .whenFinished()
-                    .thenRun(completion::processingFinished);
+            return routingService.fetchRoutesForSpecification(cargo.getRouteSpecification());
         }
-
-        return completion;
     }
 
     @Override

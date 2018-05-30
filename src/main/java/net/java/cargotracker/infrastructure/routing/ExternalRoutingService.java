@@ -1,12 +1,12 @@
 package net.java.cargotracker.infrastructure.routing;
 
+import io.reactivex.Flowable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import net.java.cargotracker.application.util.reactive.*;
 import net.java.cargotracker.domain.model.cargo.Itinerary;
 import net.java.cargotracker.domain.model.cargo.Leg;
 import net.java.cargotracker.domain.model.cargo.RouteSpecification;
@@ -38,33 +38,25 @@ public class ExternalRoutingService implements RoutingService {
             ExternalRoutingService.class.getName());
 
     @Override
-    public CompletionStream<Itinerary> fetchRoutesForSpecification(
+    public Flowable<Itinerary> fetchRoutesForSpecification(
             RouteSpecification routeSpecification) {
         // The RouteSpecification is picked apart and adapted to the external API.
         String origin = routeSpecification.getOrigin().getUnLocode().getIdString();
         String destination = routeSpecification.getDestination().getUnLocode()
                 .getIdString();
 
-        DirectCompletionStream<Itinerary> result = new DirectCompletionStream<>();
-        
-        graphTraversalResource.get(origin, destination)
-            .acceptEach(stage -> {
-
-                stage.thenAccept(transitPath -> {
-
-                            Itinerary itinerary = toItinerary(transitPath);
-                            // Use the specification to safe-guard against invalid itineraries
+        return graphTraversalResource.get(origin, destination)
+            .map(this::toItinerary)
+            .filter(itinerary -> {
+// Use the specification to safe-guard against invalid itineraries
                             if (routeSpecification.isSatisfiedBy(itinerary)) {
-                                result.itemProcessed(itinerary);
+                                return true;
                             } else {
                                 log.log(Level.FINE,
                                         "Received itinerary that did not satisfy the route specification");
+                                return false;
                             }
                 });
-            })
-            .whenFinished()
-            .thenRun(result::processingFinished);
-        return result;
     }
 
     private Itinerary toItinerary(TransitPath transitPath) {

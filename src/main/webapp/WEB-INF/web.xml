@@ -16,6 +16,12 @@
         <param-value>ui-lightness</param-value>
     </context-param>
 
+    <!-- CDI development mode -->
+    <context-param>
+        <param-name>org.jboss.weld.development</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    
     <context-param>
         <param-name>org.omnifaces.ENABLE_SOCKET_ENDPOINT</param-name>
         <param-value>true</param-value>
@@ -83,12 +89,4 @@
         <resource-adapter>jmsra</resource-adapter>
         <destination-name>HandlingEventRegistrationAttemptQueue</destination-name>
     </jms-destination>
-    <resource-env-ref>
-        <resource-env-ref-name>
-            concurrent/myExecutor
-        </resource-env-ref-name>
-        <resource-env-ref-type>
-            javax.enterprise.concurrent.ManagedExecutorService
-        </resource-env-ref-type>
-    </resource-env-ref>
 </web-app>

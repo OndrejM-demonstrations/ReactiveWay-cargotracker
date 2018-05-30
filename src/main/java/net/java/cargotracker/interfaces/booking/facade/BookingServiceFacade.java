@@ -1,8 +1,8 @@
 package net.java.cargotracker.interfaces.booking.facade;
 
+import io.reactivex.Flowable;
 import java.util.Date;
 import java.util.List;
-import net.java.cargotracker.application.util.reactive.CompletionStream;
 import net.java.cargotracker.interfaces.booking.facade.dto.CargoRoute;
 import net.java.cargotracker.interfaces.booking.facade.dto.Location;
 import net.java.cargotracker.interfaces.booking.facade.dto.RouteCandidate;
@@ -21,7 +21,7 @@ public interface BookingServiceFacade {
 
     void changeDestination(String trackingId, String destinationUnLocode);
 
-    CompletionStream<RouteCandidate> requestPossibleRoutesForCargo(String trackingId);
+    Flowable<RouteCandidate> requestPossibleRoutesForCargo(String trackingId);
 
     List<Location> listShippingLocations();
 

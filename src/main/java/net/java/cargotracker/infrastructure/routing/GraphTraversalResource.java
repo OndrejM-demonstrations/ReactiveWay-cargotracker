@@ -1,5 +1,6 @@
 package net.java.cargotracker.infrastructure.routing;
 
+import fish.payara.cdi.jsr107.impl.NamedCache;
 import fish.payara.micro.cdi.Inbound;
 import fish.payara.micro.cdi.Outbound;
 import io.reactivex.BackpressureStrategy;
@@ -10,6 +11,7 @@ import net.java.pathfinder.api.TransitPath;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
+import javax.cache.Cache;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -28,6 +30,10 @@ class GraphTraversalResource {
     @Resource
     private ManagedExecutorService executor;
 
+    @Inject
+    @NamedCache(cacheName = "GraphTraversalRequest")
+    Cache<Long, String> atMostOnceDeliveryCache;
+
     private ConcurrentHashMap<Long, FlowableEmitter<TransitPath>> resultEmitterMap = new ConcurrentHashMap<>();
 
     public Flowable<TransitPath> get(String origin, String destination) {
@@ -40,6 +46,7 @@ class GraphTraversalResource {
 
     private void onSubscribe(FlowableEmitter<TransitPath> emitter, GraphTraversalRequest request) {
         resultEmitterMap.put(request.getId(), emitter);
+        atMostOnceDeliveryCache.put(request.getId(), "");
         requestEvent.fire(request);
     }
 

@@ -16,6 +16,12 @@
         <param-value>ui-lightness</param-value>
     </context-param>
 
+    <!-- CDI development mode -->
+    <context-param>
+        <param-name>org.jboss.weld.development</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>

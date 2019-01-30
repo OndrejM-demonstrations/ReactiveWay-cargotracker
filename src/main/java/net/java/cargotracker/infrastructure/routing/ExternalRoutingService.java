@@ -14,7 +14,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import net.java.cargotracker.application.internal.ApplicationInfo;
-import net.java.cargotracker.application.util.JsonMoxyConfigurationContextResolver;
 import net.java.cargotracker.domain.model.cargo.Itinerary;
 import net.java.cargotracker.domain.model.cargo.Leg;
 import net.java.cargotracker.domain.model.cargo.RouteSpecification;
@@ -25,7 +24,6 @@ import net.java.cargotracker.domain.model.voyage.VoyageRepository;
 import net.java.cargotracker.domain.service.RoutingService;
 import net.java.pathfinder.api.TransitEdge;
 import net.java.pathfinder.api.TransitPath;
-import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
 
 /**
  * Our end of the routing service. This is basically a data model translation
@@ -59,8 +57,6 @@ public class ExternalRoutingService implements RoutingService {
         } else {
             graphTraversalResource = jaxrsClient.target(graphTraversalUrl);
         }
-        graphTraversalResource.register(new MoxyJsonFeature()).register(
-                new JsonMoxyConfigurationContextResolver());
     }
 
     @Override

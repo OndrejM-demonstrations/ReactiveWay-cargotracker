@@ -38,19 +38,19 @@ public class ItinerarySelection implements Serializable {
     List<RouteCandidate> routeCandidates;
     @Inject
     private BookingServiceFacade bookingServiceFacade;
-    
+
     @Inject
-    @Push(channel="routeCandidates")
+    @Push(channel = "routeCandidates")
     private PushContext push;
-    
+
     private CompletableFuture<Void> websocketTriggered;
-    
+
     @PostConstruct
     public void init() {
         routeCandidates = new ArrayList<>();
         websocketTriggered = new CompletableFuture<>();
     }
-    
+
     public List<RouteCandidate> getRouteCandidates() {
         return routeCandidates;
     }
@@ -70,7 +70,7 @@ public class ItinerarySelection implements Serializable {
     public List<RouteCandidate> getRouteCanditates() {
         return routeCandidates;
     }
-    
+
     public void pageLoaded() {
         websocketTriggered.complete(null);
     }
@@ -82,21 +82,21 @@ public class ItinerarySelection implements Serializable {
         loadingStarted = true;
         cargo = bookingServiceFacade.loadCargoForRouting(trackingId);
         bookingServiceFacade
-            .requestPossibleRoutesForCargo(trackingId)
+                .requestPossibleRoutesForCargo(trackingId)
                 .thenAccept(candidates -> {
-                        Logger.getGlobal().info(() -> "Accepted candidates: " + candidates);
-                        routeCandidates.addAll(candidates);
-                    }).exceptionally(e -> {
-                        websocketTriggered.thenRun(() -> {
-                            push.send("error: " + e.getMessage());
-                        });
-                        return null;
-                    })
-                .whenComplete((v, e) -> {
+                    routeCandidates = candidates;
+                })
+                .thenRun(() -> {
                     loadingFinished = true;
-                        websocketTriggered.thenRun(() -> {
-                            push.send("finished");
-                        });
+                    websocketTriggered.thenRun(() -> {
+                        push.send("finished");
+                    });
+                })
+                .exceptionally(e -> {
+                    websocketTriggered.thenRun(() -> {
+                        push.send("error: " + e.getMessage());
+                    });
+                    return null;
                 });
     }
 
@@ -107,7 +107,7 @@ public class ItinerarySelection implements Serializable {
     public boolean isLoadingFinished() {
         return loadingFinished;
     }
-    
+
     public String assignItinerary(int routeIndex) {
         RouteCandidate route = routeCandidates.get(routeIndex);
         bookingServiceFacade.assignCargoToRoute(trackingId, route);

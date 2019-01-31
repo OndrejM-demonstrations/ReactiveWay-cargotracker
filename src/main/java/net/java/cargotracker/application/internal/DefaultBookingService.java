@@ -18,6 +18,7 @@ import net.java.cargotracker.domain.model.location.Location;
 import net.java.cargotracker.domain.model.location.LocationRepository;
 import net.java.cargotracker.domain.model.location.UnLocode;
 import net.java.cargotracker.domain.service.RoutingService;
+import net.java.cargotracker.infrastructure.RefactorUtil;
 
 @Stateless
 public class DefaultBookingService implements BookingService {
@@ -59,12 +60,9 @@ public class DefaultBookingService implements BookingService {
             return Collections.emptyList();
         }
 
-        try {
-            return routingService.fetchRoutesForSpecification(cargo.getRouteSpecification())
-                    .toCompletableFuture().get(300, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-            throw new RuntimeException(ex);
-        }
+        return RefactorUtil.stageToResult(
+                routingService.fetchRoutesForSpecification(cargo.getRouteSpecification())
+        );
     }
 
     @Override

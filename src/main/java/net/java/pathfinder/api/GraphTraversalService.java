@@ -75,7 +75,7 @@ public class GraphTraversalService {
                         dao.getVoyageNumber(lastLegFrom, destinationUnLocode),
                         lastLegFrom, destinationUnLocode, fromDate, toDate));
 
-                Thread.sleep(Integer.valueOf(System.getProperty("reactivejavaee.itemslowdown", "3000")));
+                Thread.sleep(Integer.valueOf(System.getProperty("reactivejavaee.slowfactor", "0")) * 200);
                 
                 responseEvent.fire(GraphTraversalResponse.newWithValue(new TransitPath(transitEdges), request));
             }

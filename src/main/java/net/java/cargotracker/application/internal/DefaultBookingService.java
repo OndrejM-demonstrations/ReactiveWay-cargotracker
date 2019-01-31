@@ -18,7 +18,6 @@ import net.java.cargotracker.domain.model.location.Location;
 import net.java.cargotracker.domain.model.location.LocationRepository;
 import net.java.cargotracker.domain.model.location.UnLocode;
 import net.java.cargotracker.domain.service.RoutingService;
-import net.java.cargotracker.interfaces.booking.facade.dto.RouteCandidate;
 
 @Stateless
 public class DefaultBookingService implements BookingService {

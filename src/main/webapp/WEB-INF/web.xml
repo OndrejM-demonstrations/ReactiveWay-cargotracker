@@ -16,6 +16,11 @@
         <param-value>ui-lightness</param-value>
     </context-param>
 
+    <!-- CDI development mode -->
+    <context-param>
+        <param-name>org.jboss.weld.development</param-name>
+        <param-value>true</param-value>
+    </context-param>
     <context-param>
         <param-name>org.omnifaces.ENABLE_SOCKET_ENDPOINT</param-name>
         <param-value>true</param-value>
@@ -51,7 +56,7 @@
     <data-source>
         <name>java:app/jdbc/CargoTrackerDatabase</name>
         <class-name>org.apache.derby.jdbc.EmbeddedDriver</class-name>
-        <url>jdbc:derby://localhost:1527/cargo-tracker-database;create=true</url>
+        <url>jdbc:h2:${com.sun.aas.instanceRoot}/lib/databases/cargotracker;AUTO_SERVER=TRUE</url>
     </data-source>
     <jms-destination>
         <name>java:app/jms/CargoHandledQueue</name>

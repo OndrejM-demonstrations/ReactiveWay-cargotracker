@@ -82,6 +82,7 @@
             <groupId>fish.payara.api</groupId>
             <artifactId>payara-api</artifactId>
             <version>${version.payara.api}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- GlassFish specific dependencies, could go away in Java EE 8 -->

@@ -1,5 +1,7 @@
 package net.java.cargotracker.interfaces.booking.facade.internal;
 
+import io.reactivex.Flowable;
+import io.reactivex.functions.Function;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,7 +10,6 @@ import java.util.concurrent.CompletionStage;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import net.java.cargotracker.application.BookingService;
-import net.java.cargotracker.application.util.reactive.CompletionStream;
 import net.java.cargotracker.domain.model.cargo.Cargo;
 import net.java.cargotracker.domain.model.cargo.CargoRepository;
 import net.java.cargotracker.domain.model.cargo.Itinerary;
@@ -93,15 +94,15 @@ public class DefaultBookingServiceFacade implements BookingServiceFacade,
     }
 
     @Override
-    public CompletionStream<RouteCandidate> requestPossibleRoutesForCargo(String trackingId) {
+    public Flowable<RouteCandidate> requestPossibleRoutesForCargo(String trackingId) {
         return bookingService
-            .requestPossibleRoutesForCargo(new TrackingId(trackingId))
-            .applyToEach((CompletionStage<Itinerary> stage) -> {
-                return stage.thenApply(itinerary -> {
-                    ItineraryCandidateDtoAssembler dtoAssembler
-                            = new ItineraryCandidateDtoAssembler();
-                    return dtoAssembler.toDTO(itinerary);
-                });
-            });
+                .requestPossibleRoutesForCargo(new TrackingId(trackingId))
+                .map(this::itineraryToDTO);
+    }
+
+    private RouteCandidate itineraryToDTO(Itinerary itinerary) throws Exception {
+        ItineraryCandidateDtoAssembler dtoAssembler
+                = new ItineraryCandidateDtoAssembler();
+        return dtoAssembler.toDTO(itinerary);
     }
 }

@@ -1,0 +1,50 @@
+= Reactive improvements of Cargo Tracker
+
+This project provides an example how to enhance an existing Java EE application 
+written in a traditional approach in a reactive way to improve its responsiveness.
+
+This project is based on the original https://cargotracker.java.net/[cargo tracker]
+application (https://github.com/javaee/cargotracker[cargo tracker on github]). The description of the original application can be found in this link:readme.txt[readme.txt].
+
+In this project, we start with the original monolithic application, we focus one particular usecase 
+of searching for routes for delivering cargo and we improve its responsiveness using asynchronous approach in multiple steps.
+
+Principles of http://www.reactivemanifesto.org[reactive programming] are applied to the traditional code base and part of the monolithic application is separated into a microservice, following the same reactive principles.
+
+== Steps to introduce reactive behavior
+
+Each of the principles and steps to transform the application in the final state is in a separate branch:
+ 
+ * `master` - the original source code of the Cargo Tracker project with some general improvements
+ * Asynchronous API and chaining callbacks:
+ ** `01_async_api_01_jaxrs_client` - enhancement of the REST client accessing the pathfinder microservice - uses async API, but the request still waits for results to update GUI. 
+ ** `02_chaining_01_completablefuture` - CompletableFuture is used to chain executions when computation is completed asynchronously
+ * Messaging:
+ ** `03_messages_01_websocket` - added web sockets to update the UI asynchronously and make it more responsive. Web page is loaded immediately and data is pushed later when ready -> page is lot more responsive. We still have some blocking calls in the pipeline, therefore page still takes unnecessary time to load initially, or the application waits too long before sending updated to the page using the websocket.
+ ** `03_messages_02_event_bus` - turned synchronous request-response call to the PathFinder component over REST API into asynchronous message passing communication. Each computed item is sent immediately as a message, without any delay. DirectCompletionStream builds upon CompletableFuture to provide means to chain callbacks over a stream of incomming messages, which is not supported by CompletableFuture itself. Incoming messages are turned into websocket messages and sent to the page, therefore the computed data can be displayed immediatelly without waiting for all data.
+ ** `03_messages_03_jaxrs_sync` - refactoring of the PathFinder module so that it supports both the asynchronous message communication method as well as the original REST API. This is to show the difference between both approaches in the same code base
+ * Executing blocking code on a separate thread pool
+ ** `04_separate_thread_pools_01_for_DB_calls` - Blocking DB calls in ItinerarySelection.java are executing using a separate managed executor service, to avoid blocking the main executor service and listener thread pools, which are meant for non-blocking fast processing and should reserve small amount of threads to decrease unnecessary context switching
+ * Context propagation
+ ** `05_context_propagation_01_jaxrs_async_request` - propagation of JAX-RS request context so that the response from the PathFinder REST API can be built and completed in asynchronous callbacks in different threads if needed
+ ** `05_context_propagation_02_tx` - propagation of JTA transactions to the threads that execute callbacks
+ *** JTA transactions must not be container managed because they need to outlive the method call that started them
+ *** JTA transactions must not be started within an EJB, because EJBs throw exception when such a transaction is not finished before its method is left
+ *** TransactionManage is used to suspend a transaction before an asynchronous call and resume it in a callback
+ 
+== Running the demo
+
+To run the demo from the above branches, you need to install http://www.payara.fish/downloads[Payara Server version 4.1.1.171] or newer and a standalone Derby database, which is available either in the Payara Server distribution or in a JDK installation. 
+
+Deploy the application:
+
+1. Start Derby DB on localhost and the default port 1527
+2. Start Payara Server with the default configuration
+3. Deploy the application with context root `cargo-tracker`
+4. Verify that the application is running by openning the URL http://localhost:8080/cargo-tracker/ in the browser.
+
+Then navigate to the "routing" page we focus on:
+
+1. Select *Administration interface*
+2. Select a record in the "Not routed" table
+3. The routing page opens with suggested routes 

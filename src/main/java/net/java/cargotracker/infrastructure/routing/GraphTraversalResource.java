@@ -24,7 +24,7 @@ import net.java.pathfinder.api.reactive.GraphTraversalResponse;
 class GraphTraversalResource {
 
     @Inject
-    @Outbound
+    @Outbound(loopBack = true)
     private Event<GraphTraversalRequest> requestEvent;
 
     @Resource

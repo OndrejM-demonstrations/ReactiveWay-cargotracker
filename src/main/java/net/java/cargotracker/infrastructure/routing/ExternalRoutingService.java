@@ -23,6 +23,7 @@ import net.java.cargotracker.domain.model.location.UnLocode;
 import net.java.cargotracker.domain.model.voyage.VoyageNumber;
 import net.java.cargotracker.domain.model.voyage.VoyageRepository;
 import net.java.cargotracker.domain.service.RoutingService;
+import net.java.cargotracker.infrastructure.RefactorUtil;
 import net.java.pathfinder.api.TransitEdge;
 import net.java.pathfinder.api.TransitPath;
 
@@ -91,11 +92,7 @@ public class ExternalRoutingService implements RoutingService {
                             return itineraries;
                 });
 
-        try {
-            return futureResult.toCompletableFuture().get(300, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-            throw new RuntimeException(ex);
-        }
+        return RefactorUtil.stageToResult(futureResult);
 
     }
 

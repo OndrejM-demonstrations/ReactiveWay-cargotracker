@@ -14,10 +14,11 @@
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.hint.j2eeVersion>1.7</netbeans.hint.j2eeVersion>
         <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
         <webapp.databaseTempDir>/tmp</webapp.databaseTempDir>
         <webapp.graphTraversalUrl>http://localhost:8080/cargo-tracker/rest/graph-traversal/shortest-path</webapp.graphTraversalUrl>
+        <version.payara>5.184</version.payara>
+        <version.payara.api>${version.payara}</version.payara.api>
     </properties>
 
     <!-- We need to use the PrimeFaces repository -->
@@ -80,8 +81,7 @@
         <dependency>
             <groupId>fish.payara.api</groupId>
             <artifactId>payara-api</artifactId>
-            <version>4.1.1.171.1</version>
-            <scope>provided</scope>
+            <version>${version.payara.api}</version>
         </dependency>
 
         <!-- GlassFish specific dependencies, could go away in Java EE 8 -->

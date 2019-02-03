@@ -176,6 +176,30 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <from>
+                        <image>registry.hub.docker.com/payara/server-full</image>
+                    </from>
+                    <to>
+                        <image>cargotracker/monolith</image>
+                    </to>
+                    <container>
+                        <appRoot>/opt/payara/deployments/${project.build.finalName}</appRoot>
+                    </container>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

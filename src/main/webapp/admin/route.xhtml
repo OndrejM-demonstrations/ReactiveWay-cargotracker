@@ -3,7 +3,6 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:o="http://omnifaces.org/ui"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
     <ui:composition template="/WEB-INF/templates/common/admin.xhtml">
@@ -71,21 +70,17 @@
                         <h:form>
                             <p:remoteCommand name="updateNotRouted" update="notRouted"/>
                         </h:form>
-                        <h:form>
-                            <p:remoteCommand action="${itinerarySelection.pageLoaded()}" name="pageLoaded" async="true" />
-                        </h:form>
-                        <o:socket channel="routeCandidates" onmessage="updateRouteCandidates" onopen="pageLoaded" />
                         <h:outputScript target="head">
-                            function updateRouteCandidates(data) {
-                                console.log(data);
-                                updateNotRouted();
-                                if (data == 'finished') {
-                                    OmniFaces.Push.close(routeCandidates);
-                                }
-                                if (data.startsWith('error:')) {
+                            var source = new EventSource("../rest/route-data?key=<h:outputText value="#{itinerarySelection.sseKey}"/>");
+                            source.onmessage = function (event) {
+                                if (event.data === "finished") {
+                                  source.close();
+                                } else if (event.data.startsWith('error:')) {
                                     alert(data);
+                                } else {
+                                  updateNotRouted();
                                 }
-                            }
+                            };
                         </h:outputScript>
 
                         <p:panel id="notRouted">

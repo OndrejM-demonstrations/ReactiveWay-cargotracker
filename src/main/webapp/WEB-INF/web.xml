@@ -16,11 +16,6 @@
         <param-value>ui-lightness</param-value>
     </context-param>
     
-    <context-param>
-        <param-name>org.omnifaces.ENABLE_SOCKET_ENDPOINT</param-name>
-        <param-value>true</param-value>
-    </context-param>
-
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>

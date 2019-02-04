@@ -62,11 +62,6 @@
             <artifactId>rxjava</artifactId>
             <version>2.1.14</version>
         </dependency>
-        <dependency>
-            <groupId>org.omnifaces</groupId>
-            <artifactId>omnifaces</artifactId>
-            <version>2.4</version>
-        </dependency>
         
         <!-- JCache API -->
         <dependency>
@@ -197,6 +192,7 @@
                     </to>
                     <container>
                         <appRoot>/opt/payara/deployments/${project.build.finalName}</appRoot>
+                        <useCurrentTimestamp>true</useCurrentTimestamp>
                     </container>
                 </configuration>
             </plugin>

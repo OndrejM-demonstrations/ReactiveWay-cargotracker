@@ -3,16 +3,19 @@ package net.java.cargotracker.interfaces.booking.web;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.sse.*;
 import net.java.cargotracker.interfaces.booking.facade.BookingServiceFacade;
 import net.java.cargotracker.interfaces.booking.facade.dto.CargoRoute;
 import net.java.cargotracker.interfaces.booking.facade.dto.RouteCandidate;
-import org.omnifaces.cdi.*;
+import net.java.cargotracker.interfaces.booking.web.routepage.RoutePageToSseBroker;
 
 /**
  * Handles itinerary selection. Operates against a dedicated service facade, and
@@ -43,15 +46,18 @@ public class ItinerarySelection implements Serializable {
             ItinerarySelection.class.getName());
 
     @Inject
-    @Push(channel = "routeCandidates")
-    private PushContext push;
-
-    private CompletableFuture<Void> websocketTriggered;
+    private RoutePageToSseBroker broker;
+    private long sseKey;
 
     @PostConstruct
     public void init() {
         routeCandidates = new ArrayList<>();
-        websocketTriggered = new CompletableFuture<>();
+        sseKey = broker.initAndGetUniqueKey();
+    }
+    
+    @PreDestroy
+    public void shutdown() {
+        broker.shutdownForKey(sseKey);
     }
 
     public List<RouteCandidate> getRouteCandidates() {
@@ -74,10 +80,6 @@ public class ItinerarySelection implements Serializable {
         return routeCandidates;
     }
 
-    public void pageLoaded() {
-        websocketTriggered.complete(null);
-    }
-
     public void load() {
         if (hasLoadingStarted()) {
             return;
@@ -89,22 +91,30 @@ public class ItinerarySelection implements Serializable {
                 .doOnNext(routeCandidate -> {
                     log.info(() -> "Accepted " + routeCandidate);
                     routeCandidates.add(routeCandidate);
-                    websocketTriggered.thenRun(() -> {
-                        push.send("refresh");
-                    });
+                    
+                    broker.afterSseEndpointConnected(sseKey)
+                            .thenAccept(sseData -> sendSseMessge("refresh", sseData));
                 }).doOnError(e -> {
                     log.log(Level.WARNING, e, () -> "Error: " + e.getMessage());
-                    websocketTriggered.thenRun(() -> {
-                        push.send("error: " + e.getMessage());
-                    });
+                    broker.afterSseEndpointConnected(sseKey)
+                            .thenAccept(sseData -> sendSseMessge("error: " + e.getMessage(), sseData));
                 })
                 .doOnComplete(() -> {
                     loadingFinished = true;
-                    websocketTriggered.thenRun(() -> {
-                        push.send("finished");
-                    });
+                    broker.afterSseEndpointConnected(sseKey)
+                            .thenAccept(sseData -> sendSseMessge("finished", sseData));
                 })
                 .subscribe();
+    }
+
+    private void sendSseMessge(String message, RoutePageToSseBroker.SseEndpointData sseData) {
+        OutboundSseEvent.Builder sseDataEventBuilder = sseData.getSse().newEventBuilder()
+                .mediaType(MediaType.TEXT_PLAIN_TYPE);
+        sseData.getEventSink().send(
+                sseDataEventBuilder
+                        .data(message)
+                        .build()
+        );
     }
 
     private boolean hasLoadingStarted() {
@@ -121,4 +131,9 @@ public class ItinerarySelection implements Serializable {
 
         return "show.html?faces-redirect=true&trackingId=" + trackingId;
     }
+
+    public long getSseKey() {
+        return sseKey;
+    }
+    
 }

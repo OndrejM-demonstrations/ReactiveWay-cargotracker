@@ -2,6 +2,7 @@ package net.java.cargotracker.application.util;
 
 import javax.ws.rs.ApplicationPath;
 import net.java.cargotracker.interfaces.booking.rest.CargoMonitoringService;
+import net.java.cargotracker.interfaces.booking.web.routepage.RouteSseEndpoint;
 import net.java.cargotracker.interfaces.handling.rest.HandlingReportService;
 import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -17,7 +18,8 @@ public class RestConfiguration extends ResourceConfig {
         // Resources
         packages(new String[]{
             HandlingReportService.class.getPackage().getName(),
-            CargoMonitoringService.class.getPackage().getName()});
+            CargoMonitoringService.class.getPackage().getName(),
+            RouteSseEndpoint.class.getPackage().getName()});
         // Enable Bean Validation error messages.
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
         // Providers - JSON.

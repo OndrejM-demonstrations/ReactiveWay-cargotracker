@@ -186,15 +186,28 @@
                             <goal>dockerBuild</goal>
                         </goals>
                         <phase>package</phase>
+                        <configuration>
+                            <to>
+                                <image>cargotracker/monolith</image>
+                            </to>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <to>
+                                <image>registry.hub.docker.com/cargotracker/monolith</image>
+                            </to>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
                     <from>
                         <image>registry.hub.docker.com/payara/server-full</image>
                     </from>
-                    <to>
-                        <image>cargotracker/monolith</image>
-                    </to>
                     <container>
                         <appRoot>/opt/payara/deployments/${project.build.finalName}</appRoot>
                     </container>

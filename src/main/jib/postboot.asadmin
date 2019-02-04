@@ -1,0 +1,1 @@
+set-hazelcast-configuration --dynamic=true --clustermode dns --dnsmembers pathfinder:6900

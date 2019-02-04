@@ -210,6 +210,9 @@
                     </from>
                     <container>
                         <appRoot>/opt/payara/deployments/${project.build.finalName}</appRoot>
+                        <environment>
+                            <POSTBOOT_COMMANDS>/postboot.asadmin</POSTBOOT_COMMANDS>
+                        </environment>
                     </container>
                 </configuration>
             </plugin>
